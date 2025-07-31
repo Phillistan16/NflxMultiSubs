@@ -12,7 +12,8 @@
     "https://assets.nflxext.com/*"
   ],
   "background": {
-    "service_worker": "service_worker.min.js"
+    "service_worker": "service_worker.min.js",
+    "type": "module"
   },
   "icons": {
     "16": "icon16.png",

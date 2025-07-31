@@ -1,9 +1,15 @@
 {
   "name": "NflxMultiSubs 2021 (Netflix Multi. Subtitles)",
+  "description": "Bilingual Subtitles for the Netflix Web App. An actively maintained fork with various bugfixes and improvements.",
+  "version": "1.0.0",
   "manifest_version": 3,
   "author": "Dan Chen, Gert Mertes",
   "permissions": [
     "storage"
+  ],
+  "host_permissions": [
+    "https://www.netflix.com/watch/*",
+    "https://assets.nflxext.com/*"
   ],
   "background": {
     "service_worker": "service_worker.min.js"
@@ -11,8 +17,7 @@
   "icons": {
     "16": "icon16.png",
     "32": "icon32.png",
-    "128": "icon128.png",
-    "512": "icon.png"
+    "128": "icon128.png"
   },
   "content_scripts": [
     {
@@ -36,7 +41,7 @@
         "nflxmultisubs.min.js"
       ],
       "matches": [
-        "<all_urls>"
+        "https://www.netflix.com/*"
       ]
     }
   ],
@@ -44,9 +49,7 @@
     "default_icon": "icon-gray.png",
     "default_popup": "settings.html"
   },
-  "content_security_policy": {},
-  "host_permissions": [
-    "https://www.netflix.com/watch/*",
-    "https://assets.nflxext.com/*"
-  ]
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
 }

@@ -3,6 +3,49 @@ const JSZip = require('jszip');
 const kDefaultSettings = require('./default-settings');
 const PlaybackRateController = require('./playback-rate-controller');
 
+// --------- AD DETECTION PATCH ---------
+/**
+ * Detect if a Netflix ad is currently playing.
+ * Returns true if an ad overlay is detected or if ad-container is present.
+ * Extend this logic as Netflix changes their ad UIs.
+ */
+function isAdPlaying() {
+  // Netflix shows an ad container overlay during ads
+  // Try to detect common ad containers
+  if (
+    document.querySelector('.ad-player-container') || // Old
+    document.querySelector('[data-uia="ad-player-container"]') || // Newer
+    document.querySelector('.ad-break') || // Sometimes used
+    document.querySelector('.WatchAd-ui-container') || // Used in some regions
+    document.querySelector('.WatchAd-Container') ||
+    document.querySelector('.WatchAdPlayerContainer')
+  ) {
+    return true;
+  }
+
+  // Fallback: If the video is paused, but not ended, and there's a visible overlay
+  const video = document.querySelector('#appMountPoint video');
+  if (video && video.paused && !video.ended) {
+    // Check if there is a visible overlay over the video
+    const overlays = [
+      '.ad-player-container',
+      '[data-uia="ad-player-container"]',
+      '.ad-break',
+      '.WatchAd-ui-container',
+      '.WatchAd-Container',
+      '.WatchAdPlayerContainer',
+      '.player-ad-interrupt-container'
+    ];
+    for (const sel of overlays) {
+      const el = document.querySelector(sel);
+      if (el && window.getComputedStyle(el).display !== "none" && el.offsetParent !== null) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Hook JSON.parse() and attempt to intercept the manifest
@@ -961,6 +1004,15 @@ class RendererLoop {
       return;
     }
 
+    // --------- AD DETECTION PATCH: Pause during ads ---------
+    if (isAdPlaying()) {
+      // Optionally, you can clear secondary subs for clarity:
+      this._clearSecondarySubtitles();
+      // Skip the rest of the rendering while an ad is playing
+      return;
+    }
+    // --------- END AD DETECTION PATCH ---------
+    
     if (currentVideoElem && this.videoElem.src !== currentVideoElem.src) {
       // TODO: do we still need to check for this?
       // some video change episodes by update video src

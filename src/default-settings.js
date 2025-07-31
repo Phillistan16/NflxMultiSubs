@@ -22,4 +22,4 @@ const kDefaultSettings = {
   secondaryLanguageLastUsedIsCaption: undefined,
 };
 
-module.exports = kDefaultSettings;
+export default kDefaultSettings;
